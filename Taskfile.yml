@@ -35,10 +35,10 @@ tasks:
   mysql-dump:
     internal: true
     cmds:
-      - cmd: mysqldump --user={{ .MYSQL_USERNAME }} --password={{ .MYSQL_PASSWORD }} --databases {{ .MYSQL_DATABASES }} --skip-add-locks --no-tablespaces > {{ .BACKUP_PATH }}/mysql-dump.sql
+      - cmd: mysqldump --user={{ .MYSQL_USERNAME }} --password={{ .MYSQL_PASSWORD }} --databases {{ .MYSQL_DATABASES }} --skip-add-locks --no-tablespaces > {{ .BACKUP_WORK_DIRECTORY }}/mysql-dump.sql
       - task: compress
         vars:
-          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mysql-dump.sql"
+          INCLUDE_DIRS: "{{ .BACKUP_WORK_DIRECTORY }}/mysql-dump.sql"
           EXCLUDE_DIRS: ""
     status:
       - | 
@@ -53,7 +53,7 @@ tasks:
           MONGODB_DATABASE: "{{ .ITEM }}"
       - task: compress
         vars:
-          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mongodb-dump"
+          INCLUDE_DIRS: "{{ .BACKUP_WORK_DIRECTORY }}/mongodb-dump"
           EXCLUDE_DIRS: ""
     status:
       - |
@@ -61,26 +61,26 @@ tasks:
 
   mongodb-dump-db:
     cmds:
-      - cmd: mongodump --username={{ .MONGODB_USERNAME }} --password={{ .MONGODB_PASSWORD }} --authenticationDatabase={{ .MONGODB_AUTH_DB }} --db={{ .MONGODB_DATABASE }} --out {{ .BACKUP_PATH }}/mongodb-dump
+      - cmd: mongodump --username={{ .MONGODB_USERNAME }} --password={{ .MONGODB_PASSWORD }} --authenticationDatabase={{ .MONGODB_AUTH_DB }} --db={{ .MONGODB_DATABASE }} --out {{ .BACKUP_WORK_DIRECTORY }}/mongodb-dump
       - task: compress
         vars:
-          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mongodb-dump"
+          INCLUDE_DIRS: "{{ .BACKUP_WORK_DIRECTORY }}/mongodb-dump"
           EXCLUDE_DIRS: ""
 
-  cleanup: rm -rf {{ .BACKUP_PATH }}
+  cleanup: rm -rf {{ .BACKUP_WORK_DIRECTORY }}
 
   compress:
     internal: true
     cmds:
       - cmd: |
-          {{ .COMPRESSION_7Z_PATH }} a -t7z -m0=lzma -mx={{ .COMPRESSION_LEVEL }}  -mmt1 -ms=on -mhe -p"{{ .COMPRESSION_PASSWORD }}" {{ .BACKUP_PATH }}/{{ .BACKUP_NAME }}.7z {{ range $i, $dir := splitList "," .INCLUDE_DIRS }}{{ $dir }} {{ end }} {{ if gt .EXCLUDE_DIRS "" }}{{ range $i, $dir := splitList "," .EXCLUDE_DIRS }}-xr!{{ $dir }} {{ end }}{{ end }}
+          {{ .COMPRESSION_7Z_PATH }} a -t7z -m0=lzma -mx={{ .COMPRESSION_LEVEL }}  -mmt1 -ms=on -mhe -p"{{ .COMPRESSION_PASSWORD }}" {{ .BACKUP_WORK_DIRECTORY }}/{{ .BACKUP_NAME }}.7z {{ range $i, $dir := splitList "," .INCLUDE_DIRS }}{{ $dir }} {{ end }} {{ if gt .EXCLUDE_DIRS "" }}{{ range $i, $dir := splitList "," .EXCLUDE_DIRS }}-xr!{{ $dir }} {{ end }}{{ end }}
 
   run:
     cmds:
       - cmd: |
-          echo "Creating backup file: {{ .BACKUP_NAME }} in {{ .BACKUP_PATH }}"
+          echo "Creating backup file: {{ .BACKUP_NAME }} in {{ .BACKUP_WORK_DIRECTORY }}"
 #      - task: cleanup
-      - cmd: mkdir -p {{ .BACKUP_PATH }}
+      - cmd: mkdir -p {{ .BACKUP_WORK_DIRECTORY }}
 #      - defer: { task: cleanup }
       - task: directories
       - task: nginx-vhosts
