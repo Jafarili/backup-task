@@ -27,7 +27,7 @@ tasks:
       - cmd: mysqldump --user={{ .MYSQL_USERNAME }} --password={{ .MYSQL_PASSWORD }} --databases {{ .MYSQL_DATABASES }} --skip-add-locks --no-tablespaces > {{ .BACKUP_PATH }}/mysql-dump.sql
       - task: compress
         vars:
-          INCLUDE_DIRS: "$BACKUP_PATH/mysql-dump.sql"
+          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mysql-dump.sql"
           EXCLUDE_DIRS: ""
     status:
       - | 
