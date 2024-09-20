@@ -62,7 +62,7 @@ tasks:
     internal: true
     cmds:
       - cmd: |
-          {{ .COMPRESSION_7Z_PATH }} a -t7z -m0=lzma -mx={{ .COMPRESSION_LEVEL }}  -mmt1 -ms=on -mhe -p"{{ .COMPRESSION_PASSWORD }}" {{ .BACKUP_PATH }}/{{ .BACKUP_NAME }}.7z {{ range $i, $dir := splitList "," .INCLUDE_DIRS }}{{ $dir }} {{ end }} {{ if gt .EXCLUDE_DIRS 0 }}{{ range $i, $dir := splitList "," .EXCLUDE_DIRS }}-xr!{{ $dir }} {{ end }}{{ end }}
+          {{ .COMPRESSION_7Z_PATH }} a -t7z -m0=lzma -mx={{ .COMPRESSION_LEVEL }}  -mmt1 -ms=on -mhe -p"{{ .COMPRESSION_PASSWORD }}" {{ .BACKUP_PATH }}/{{ .BACKUP_NAME }}.7z {{ range $i, $dir := splitList "," .INCLUDE_DIRS }}{{ $dir }} {{ end }} {{ if gt .EXCLUDE_DIRS "" }}{{ range $i, $dir := splitList "," .EXCLUDE_DIRS }}-xr!{{ $dir }} {{ end }}{{ end }}
 
   run:
     cmds:
