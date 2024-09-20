@@ -7,6 +7,17 @@ env:
     sh: "echo backup-$(date +'%Y-%m-%d-%H-%M-%S').7z"
 
 tasks:
+  directories:
+    internal: true
+    vars:
+      INCLUDE_DIRS: "{{ .BACKUP_INCLUDE_DIRS }}"
+      EXCLUDE_DIRS: "{{ .BACKUP_EXCLUDE_DIRS }}"
+    cmds:
+      - task: compress
+    status:
+      - |
+        ls {{ .INCLUDE_DIRS }} | grep -q . && exit 1 || exit 0
+
   nginx-vhosts:
     internal: true
     vars:
@@ -71,6 +82,7 @@ tasks:
 #      - task: cleanup
       - cmd: mkdir -p {{ .BACKUP_PATH }}
 #      - defer: { task: cleanup }
+      - task: directories
       - task: nginx-vhosts
       - task: mysql-dump
       - task: mongodb-dump
