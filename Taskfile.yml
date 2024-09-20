@@ -2,6 +2,10 @@ version: '3'
 
 dotenv: [".env"]
 
+env:
+  BACKUP_NAME:
+    sh: "echo backup-$(date +'%Y-%m-%d-%H-%M-%S').7z"
+
 tasks:
   nginx-vhosts:
     internal: true
@@ -28,18 +32,13 @@ tasks:
   compress:
     cmds:
       - cmd: /usr/bin/7z a -t7z -m0=lzma -mx=$COMPRESSION_LEVEL -mmt1 -ms=on -mhe -p"$COMPRESSION_PASSWORD" $BACKUP_PATH/$BACKUP_NAME.7z {{ range $i, $dir := splitList .INCLUDE_DIRS "," }}{{ $dir }} {{ end }} -xr!{{ range $i, $dir := splitList .EXCLUDE_DIRS "," }}{{ $dir }} {{ end }}
-#    preconditions:
-#      - $COMPRESSION_LEVEL != ""
-#      - $COMPRESSION_PASSWORD != ""
 
   run:
-    vars:
-      BACKUP_NAME: "backup-$(date +'%Y-%m-%d-%H-%M-%S').7z"
     cmds:
       - cmd: |
-          echo "Creating backup file: {{.BACKUP_NAME}} in $BACKUP_PATH"
+          echo "Creating backup file: $BACKUP_NAME in $BACKUP_PATH"
       - task: cleanup
       - cmd: mkdir -p $BACKUP_PATH
       - defer: { task: cleanup }
       - task: nginx-vhosts
-#      - task: mysql-dump
+      - task: mysql-dump
