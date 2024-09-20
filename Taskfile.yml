@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: [".env", ".env.dist"]
+dotenv: [".env.{{ .CONFIG }}", ".env.dist"]
 
 env:
   BACKUP_NAME:
@@ -60,6 +60,7 @@ tasks:
         {{ if gt .MONGODB_DATABASES "" }}exit 1{{ else }}exit 0{{ end }}
 
   mongodb-dump-db:
+    internal: true
     cmds:
       - cmd: mongodump --username={{ .MONGODB_USERNAME }} --password={{ .MONGODB_PASSWORD }} --authenticationDatabase={{ .MONGODB_AUTH_DB }} --db={{ .MONGODB_DATABASE }} --out {{ .BACKUP_WORK_DIRECTORY }}/mongodb-dump
       - task: compress
@@ -78,7 +79,8 @@ tasks:
   upload:
     internal: true
     cmds:
-      - cmd: {{ .RCLONE_PATH }} copy {{ .BACKUP_WORK_DIRECTORY }}/{{ .BACKUP_NAME }}.7z {{ .RCLONE_REMOTE }}:{{ .RCLONE_DESTINATION }}/{{ .BACKUP_NAME }}.7z
+      - cmd: |
+          {{ .RCLONE_PATH }} copy {{ .BACKUP_WORK_DIRECTORY }}/{{ .BACKUP_NAME }}.7z {{ .RCLONE_REMOTE }}:{{ .RCLONE_DESTINATION }}/{{ .BACKUP_NAME }}.7z
 
   run:
     cmds:
