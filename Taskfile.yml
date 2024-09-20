@@ -1,0 +1,45 @@
+version: '3'
+
+dotenv: [".env"]
+
+tasks:
+  nginx-vhosts:
+    internal: true
+    cmds:
+      - task: compress
+        vars:
+          INCLUDE_DIRS: "/etc/nginx/sites-enabled/"
+          EXCLUDE_DIRS: "/etc/nginx/sites-enabled/default"
+
+  mysql-dump:
+    internal: true
+    cmds:
+      - cmd: mysqldump --user=$MYSQL_USERNAME --password=$MYSQL_PASSWORD --databases $MYSQL_DATABASES --skip-add-locks --no-tablespaces > $BACKUP_PATH/mysql-dump.sql
+      - task: compress
+        vars:
+          INCLUDE_DIRS: "$BACKUP_PATH/mysql-dump.sql"
+    preconditions:
+      - $MYSQL_USERNAME != ""
+      - $MYSQL_PASSWORD != ""
+      - $MYSQL_DATABASES != ""
+
+  cleanup: rm -rf $BACKUP_PATH
+
+  compress:
+    cmds:
+      - cmd: /usr/bin/7z a -t7z -m0=lzma -mx=$COMPRESSION_LEVEL -mmt1 -ms=on -mhe -p"$COMPRESSION_PASSWORD" $BACKUP_PATH/$BACKUP_NAME.7z {{ range $i, $dir := splitList .INCLUDE_DIRS "," }}{{ $dir }} {{ end }} -xr!{{ range $i, $dir := splitList .EXCLUDE_DIRS "," }}{{ $dir }} {{ end }}
+#    preconditions:
+#      - $COMPRESSION_LEVEL != ""
+#      - $COMPRESSION_PASSWORD != ""
+
+  run:
+    vars:
+      BACKUP_NAME: "backup-$(date +'%Y-%m-%d-%H-%M-%S').7z"
+    cmds:
+      - cmd: |
+          echo "Creating backup file: {{.BACKUP_NAME}} in $BACKUP_PATH"
+      - task: cleanup
+      - cmd: mkdir -p $BACKUP_PATH
+      - defer: { task: cleanup }
+      - task: nginx-vhosts
+#      - task: mysql-dump
