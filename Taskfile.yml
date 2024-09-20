@@ -1,6 +1,6 @@
 version: '3'
 
-dotenv: [".env"]
+dotenv: [".env", ".env.dist"]
 
 env:
   BACKUP_NAME:
