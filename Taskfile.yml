@@ -42,7 +42,7 @@ tasks:
           MONGODB_DATABASE: "{{ .ITEM }}"
       - task: compress
         vars:
-          INCLUDE_DIRS: "$BACKUP_PATH/mongodb-dump"
+          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mongodb-dump"
           EXCLUDE_DIRS: ""
     status:
       - |
@@ -53,10 +53,10 @@ tasks:
       - cmd: mongodump --username={{ .MONGODB_USERNAME }} --password={{ .MONGODB_PASSWORD }} --authenticationDatabase={{ .MONGODB_AUTH_DB }} --db={{ .MONGODB_DATABASE }} --out {{ .BACKUP_PATH }}/mongodb-dump
       - task: compress
         vars:
-          INCLUDE_DIRS: "$BACKUP_PATH/mongodb-dump"
+          INCLUDE_DIRS: "{{ .BACKUP_PATH }}/mongodb-dump"
           EXCLUDE_DIRS: ""
 
-  cleanup: rm -rf $BACKUP_PATH
+  cleanup: rm -rf {{ .BACKUP_PATH }}
 
   compress:
     internal: true
@@ -67,9 +67,9 @@ tasks:
   run:
     cmds:
       - cmd: |
-          echo "Creating backup file: $BACKUP_NAME in $BACKUP_PATH"
+          echo "Creating backup file: {{ .BACKUP_NAME }} in {{ .BACKUP_PATH }}"
 #      - task: cleanup
-      - cmd: mkdir -p $BACKUP_PATH
+      - cmd: mkdir -p {{ .BACKUP_PATH }}
 #      - defer: { task: cleanup }
       - task: nginx-vhosts
       - task: mysql-dump
