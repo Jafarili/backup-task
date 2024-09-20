@@ -32,16 +32,31 @@ tasks:
       - | 
         {{ if gt .MYSQL_DATABASES "" }}exit 1{{ else }}exit 0{{ end }}
 
+  mongodb-dump:
+    internal: true
+    cmds:
+      - for: { var: MONGODB_DATABASES, split: ',' }
+        task: mongodb-dump-db
+        vars:
+          MONGODB_DATABASE: "{{ .ITEM }}"
+      - task: compress
+        vars:
+          INCLUDE_DIRS: "$BACKUP_PATH/mongodb-dump"
+    status:
+      - |
+        {{ if gt .MONGODB_DATABASES "" }}exit 1{{ else }}exit 0{{ end }}
+
+  mongodb-dump-db:
+    cmds:
+      - cmd: mongodump --username={{ .MONGODB_USERNAME }} --password={{ .MONGODB_PASSWORD }} --authenticationDatabase={{ .MONGODB_AUTH_DB }} --db={{ .MONGODB_DATABASE }} --out {{ .BACKUP_PATH }}/mongodb-dump
+      - task: compress
+        vars:
+          INCLUDE_DIRS: "$BACKUP_PATH/mongodb-dump"
+
   cleanup: rm -rf $BACKUP_PATH
 
   compress:
     internal: true
-    vars:
-      COMPRESSION_7Z_PATH: "{{ .COMPRESSION_7Z_PATH }}"
-      COMPRESSION_LEVEL: "{{ .COMPRESSION_LEVEL }}"
-      COMPRESSION_PASSWORD: "{{ .COMPRESSION_PASSWORD }}"
-      BACKUP_PATH: "{{ .BACKUP_PATH }}"
-      BACKUP_NAME: "{{ .BACKUP_NAME }}"
     cmds:
       - cmd: |
           {{ .COMPRESSION_7Z_PATH }} a -t7z -m0=lzma -mx={{ .COMPRESSION_LEVEL }}  -mmt1 -ms=on -mhe -p"{{ .COMPRESSION_PASSWORD }}" {{ .BACKUP_PATH }}/{{ .BACKUP_NAME }}.7z {{ range $i, $dir := splitList "," .INCLUDE_DIRS }}{{ $dir }} {{ end }} {{ range $i, $dir := splitList "," .EXCLUDE_DIRS }}-xr!{{ $dir }} {{ end }}
@@ -50,8 +65,9 @@ tasks:
     cmds:
       - cmd: |
           echo "Creating backup file: $BACKUP_NAME in $BACKUP_PATH"
-      - task: cleanup
+#      - task: cleanup
       - cmd: mkdir -p $BACKUP_PATH
-      - defer: { task: cleanup }
+#      - defer: { task: cleanup }
       - task: nginx-vhosts
       - task: mysql-dump
+      - task: mongodb-dump
