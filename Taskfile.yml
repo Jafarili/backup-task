@@ -82,6 +82,14 @@ tasks:
       - cmd: |
           {{ .RCLONE_PATH }} copy {{ .BACKUP_WORK_DIRECTORY }}/{{ .BACKUP_NAME }}.7z {{ .RCLONE_REMOTE }}:{{ .RCLONE_DESTINATION }}/{{ .BACKUP_NAME }}.7z
 
+  delete-old-backups:
+    cmds:
+      - cmd: |
+          {{ .RCLONE_PATH }} delete --min-age={{ .BACKUP_RETENTION }} {{ .RCLONE_REMOTE }}:{{ .RCLONE_DESTINATION }}
+    status:
+      - |
+        {{ if gt .BACKUP_RETENTION "" }}exit 1{{ else }}exit 0{{ end }}
+
   run:
     cmds:
       - cmd: |
@@ -94,3 +102,4 @@ tasks:
       - task: mysql-dump
       - task: mongodb-dump
       - task: upload
+      - task: delete-old-backups
