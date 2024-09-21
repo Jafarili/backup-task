@@ -1,5 +1,5 @@
 # Backup Taskfile
-This is a Taskfile to backup files and MySQL and MongoDB databases to a remote storage like Google Drive, GCS and S3.
+This is a Taskfile to backup files, directories, MySQL and MongoDB databases to a remote storage like Google Drive, GCS and S3.
 It uses `7z` to compress the files and `rclone` to upload them to a remote storage.
 It supports multiple backup profiles and can be easily extended.
 
