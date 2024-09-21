@@ -97,9 +97,9 @@ tasks:
     cmds:
       - cmd: |
           echo "Creating backup file: {{ .BACKUP_NAME }} in {{ .BACKUP_WORK_DIRECTORY }}"
-#      - task: cleanup
+      - task: cleanup
       - cmd: mkdir -p {{ .BACKUP_WORK_DIRECTORY }}
-#      - defer: { task: cleanup }
+      - defer: { task: cleanup }
       - task: directories
       - task: nginx-vhosts
       - task: mysql-dump
