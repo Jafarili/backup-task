@@ -1,10 +1,10 @@
 version: '3'
 
-dotenv: [".env.{{ .CONFIG }}", ".env.dist"]
+dotenv: [".env.{{ .PROFILE }}", ".env.dist"]
 
 env:
   BACKUP_NAME:
-    sh: "echo backup-{{ .CONFIG }}-$(date +'%Y-%m-%d-%H-%M-%S').7z"
+    sh: "echo backup-{{ .PROFILE }}-$(date +'%Y-%m-%d-%H-%M-%S').7z"
 
 tasks:
   directories:
