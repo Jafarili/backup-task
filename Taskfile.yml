@@ -4,7 +4,7 @@ dotenv: [".env.{{ .CONFIG }}", ".env.dist"]
 
 env:
   BACKUP_NAME:
-    sh: "echo backup-$(date +'%Y-%m-%d-%H-%M-%S').7z"
+    sh: "echo backup-{{ .CONFIG }}-$(date +'%Y-%m-%d-%H-%M-%S').7z"
 
 tasks:
   directories:
