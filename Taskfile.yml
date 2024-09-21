@@ -21,20 +21,6 @@ tasks:
       - |
         {{ if gt .BACKUP_INCLUDE_DIRS "" }}exit 1{{ else }}exit 0{{ end }}
 
-  nginx-vhosts:
-    internal: true
-    vars:
-      INCLUDE_DIRS: "/etc/nginx/sites-enabled/"
-      EXCLUDE_DIRS: "/etc/nginx/sites-enabled/default"
-    cmds:
-      - task: compress
-        vars:
-          INCLUDE_DIRS: '{{ .INCLUDE_DIRS }}'
-          EXCLUDE_DIRS: '{{ .EXCLUDE_DIRS }}'
-    status:
-      - |
-        ls {{ .INCLUDE_DIRS }} | grep -q . && exit 1 || exit 0
-
   mysql-dump:
     internal: true
     cmds:
@@ -101,7 +87,6 @@ tasks:
       - cmd: mkdir -p {{ .BACKUP_WORK_DIRECTORY }}
       - defer: { task: cleanup }
       - task: directories
-      - task: nginx-vhosts
       - task: mysql-dump
       - task: mongodb-dump
       - task: upload
