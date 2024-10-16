@@ -26,6 +26,7 @@ The following environment variables are supported:
 - `MONGODB_AUTH_DB`: The authentication database to use.
 - `MONGODB_DATABASES`: The databases to backup. Enter the databases separated by a comma. Example: `db1,db2`
 - `RCLONE_PATH`: The path to the `rclone` executable. Default: `/usr/bin/rclone`
+- `RCLONE_CONFIG_PATH`: The path to the `rclone` configuration file. Default: `~/.config/rclone/rclone.conf`
 - `RCLONE_REMOTE`: The profile to use for `rclone`. Example: `gdrive`
 - `RCLONE_DESTINATION`: The destination to use for `rclone`. Example: `/`
 - `BACKUP_RETENTION`: The retention policy to use. Example: `15d`
